@@ -1,7 +1,7 @@
 #line 2 "IotHome.ESP8266Sensor.ino"  
 
 // UNCOMMENT THIS LINE TO RUN UNIT TESTS
-#define TEST
+// #define TEST
 
 #include <FS.h> //this needs to be first, or it all crashes and burns...
 #include <ESP8266WiFi.h>
@@ -10,11 +10,12 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-#include "Constants.h"
+#include "src/Constants.h"
 
 #ifdef TEST
   #include <AUnit.h>
-  #include "ConfigurationTests.h"
+  #include "tests/ConfigurationTests.h"
+  #include "tests/LedTests.h"
 
   void setup()
   {
@@ -27,28 +28,26 @@
     aunit::TestRunner::run();
   }
 #else
-  #include "src/iotc/common/string_buffer.h"
-  #include "src/iotc/iotc.h"
-  #include "Led.h"
-  #include "Configuration.h"
-  #include "Connection.h"
-  #include "Enums.h"
+    #include "src/iotc/common/string_buffer.h"
+    #include "src/iotc/iotc.h"
+    #include "src/Led.h"
+    #include "src/Keyboard.h"
+    #include "src/ConfigurationFile.h"
+    #include "src/Connection.h"
+    #include "src/Enums.h"
 
-  Adafruit_BME280 bme;
-  IOTContext context = NULL;
-  
-  Led *led;
-  Configuration *configuration;
-  Connection *connection;
-  
-  AppState appState = AppState::Waiting;
-  bool isConnected = false;
-  unsigned long startupTime;
-  
-  inline bool isButtonPressed(){
-    return digitalRead(RESET_BUTTON_PIN) == HIGH;
-  }
-  
+    Adafruit_BME280 bme;
+    IOTContext context = NULL;
+
+    Led *led;
+    Keyboard *keyboard;
+    ConfigurationFile *configurationFile;
+    Connection *connection;
+
+    AppState appState = AppState::Waiting;
+    bool isConnected = false;
+    unsigned long startupTime;
+
   inline bool timePassed(unsigned long since, unsigned long time) {
     return millis() - since >= time;
   }
@@ -113,70 +112,83 @@
     }
   }
   
-  void wait()
-  {
-    if (isButtonPressed())
+    void wait()
     {
-      configuration->remove();    
-      
-      led->off(LedColor::Green);
-      appState = AppState::Initializing;
+        LOG_VERBOSE("Waiting!");
+        if (keyboard->isButtonPressed(Buttons::Reset))
+        {
+            configurationFile->remove();
+            
+            led->off(LedColor::Green);
+            appState = AppState::Initializing;
+        }
+        else if (timePassed(startupTime, INIT_DELAY))
+        {
+            led->off(LedColor::Green);
+            appState = AppState::Initializing;
+        }
     }
-    else if (timePassed(startupTime, INIT_DELAY))
+  
+    void initialize()
     {
-      led->off(LedColor::Green);
-      appState = AppState::Initializing;
-    }
-  }
-  
-  void initialize(){
-    led->blink(LedColor::Red, 0.5);
-  
-    configuration->load();
-    delay(5000);
-  
-    led->off(LedColor::Red);
-  
-    appState = AppState::Sending;
-  }
-  
-  void send()
-  {  
-  }
+        LOG_VERBOSE("Initializing!");
+        if (!configurationFile->isMounted())
+        {
+            appState = AppState::Error;
+            return;
+        }
 
-  void setup()
-  {
-    Serial.begin(SERIAL_BAUD);
-    startupTime = millis();
-    pinMode(RESET_BUTTON_PIN, INPUT);
-    
-    led = new Led(GREEN_LED_PIN, RED_LED_PIN);
-    configuration = new Configuration();
-    connection = new Connection(configuration);
-      
-    led->blink(LedColor::Green, 0.5);
-    configuration->initialize();  
-  //  if (!configureFileSystem() || !configureWiFi() || !configureBme() || !configureIoTHub()) {
-  //    // TODO: what should we do when configuration fails?
-  //    ESP.deepSleep(SLEEP_TIME);
-  //    return;
-  //  }
-  //
-  //  ticker.attach(0.5, onTick);
-  //  if (isConnected) {
-  //    sendMessage("temperature", bme.readTemperature());
-  //    sendMessage("humidity", bme.readHumidity());
-  //  }
-  //  
-  //  ESP.deepSleep(SLEEP_TIME);
-  }
-  
-  void loop()
-  {
-    switch (appState) {
-      case Waiting: wait(); break;
-      case Initializing: initialize(); break;
-      case Sending: send(); break;
+        appState = AppState::Sending;
     }
-  }
+  
+    void send()
+    {
+        LOG_VERBOSE("Sending!");
+    }
+
+    void error()
+    {
+        LOG_VERBOSE("Error!");
+        led->blink(LedColor::Red, 0.2);
+        delay(5000);
+        appState = AppState::Finished;
+    }
+
+    void finished()
+    {
+        LOG_VERBOSE("Finished!");
+        // TODO: deep sleep SLEEP_TIME - processing time
+        // ESP.deepSleep(SLEEP_TIME);
+    }
+
+    void setup()
+    {
+        Serial.begin(SERIAL_BAUD);
+        startupTime = millis();
+        pinMode(RESET_BUTTON_PIN, INPUT);
+
+        led = new Led(GREEN_LED_PIN, RED_LED_PIN);
+        keyboard = new Keyboard(RESET_BUTTON_PIN);
+        configurationFile = new ConfigurationFile();
+        connection = new Connection(configurationFile);
+
+        led->blink(LedColor::Green, 0.5);
+
+      //  if (!configureWiFi() || !configureBme() || !configureIoTHub()) {
+      //  if (isConnected) {
+      //    sendMessage("temperature", bme.readTemperature());
+      //    sendMessage("humidity", bme.readHumidity());
+    }
+  
+    void loop()
+    {
+        switch (appState)
+        {
+            case Waiting: wait(); break;
+            case Initializing: initialize(); break;
+            case Sending: send(); break;
+            case Error: error(); break;
+            case Finished: finished(); break;
+        }
+    }
 #endif
