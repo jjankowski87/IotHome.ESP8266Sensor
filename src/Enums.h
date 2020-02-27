@@ -22,4 +22,10 @@ enum AppState
     Finished
 };
 
+enum ReadingType
+{
+    Temperature,
+    Humidity
+};
+
 #endif

@@ -11,6 +11,8 @@ Application::Application()
     _keyboard = new Keyboard(RESET_BUTTON_PIN);
     _configurationFile = new ConfigurationFile();
     _wifi = new Connection(_configurationFile, _led);
+    _sensor = new BmeSensor(BME_ADDRESS);
+    _iotHubClient = new IotHubClient();
 }
 
 Application::~Application()
@@ -19,6 +21,8 @@ Application::~Application()
     delete _wifi;
     delete _keyboard;
     delete _led;
+    delete _sensor;
+    delete _iotHubClient;
 }
 
 void Application::loop()
@@ -41,18 +45,17 @@ inline AppState Application::nextState()
 
 AppState Application::setup()
 {
+    if (!_configurationFile->isMounted() || !_sensor->isConnected())
+    {
+        return AppState::Error;
+    }
+
     _led->on(LedColor::Green);
     return AppState::Waiting;
 }
 
 AppState Application::wait()
 {
-    if (!_configurationFile->isMounted())
-    {
-        _led->off(LedColor::Green);
-        return AppState::Error;
-    }
-
     if (_keyboard->isButtonPressed(Buttons::Reset))
     {
         _state.resetWiFi = true;
@@ -76,31 +79,30 @@ AppState Application::initialize()
         return AppState::Error;
     }
 
+    Config config = _configurationFile->load();
+    if (!_iotHubClient->initialize(config))
+    {
+        return AppState::Error;
+    }
+
     return AppState::Sending;
 }
 
 AppState Application::send()
 {
-    LOG_VERBOSE("send");
-
     _led->blink(LedColor::Green, BLINK_SEND);
-    delay(5000);
 
-    // TODO: configure bme and iothub
-    //  if (!configureWiFi() || !configureBme() || !configureIoTHub()) {
-    //  if (isConnected) {
-    //    sendMessage("temperature", bme.readTemperature());
-    //    sendMessage("humidity", bme.readHumidity());
+    Config config = _configurationFile->load();
+    _iotHubClient->sendMessage("temperature", _sensor->get(ReadingType::Temperature), config);
+    _iotHubClient->sendMessage("humidity", _sensor->get(ReadingType::Humidity), config);
 
     return AppState::Finished;
 }
 
 AppState Application::error()
 {
-    LOG_VERBOSE("error");
-
     _led->blink(LedColor::Red, BLINK_ERROR);
-    delay(5000);
+    delay(1200);
 
     return AppState::Finished;
 }

@@ -1,9 +1,11 @@
 #ifndef Application_h
 #define Application_h
 
+#include "BmeSensor.h"
 #include "ConfigurationFile.h"
 #include "Connection.h"
 #include "Enums.h"
+#include "IotHubClient.h"
 #include "Keyboard.h"
 #include "Led.h"
 
@@ -24,10 +26,12 @@ class Application
         State _state;
         unsigned long _startupTime;
 
+        BmeSensor* _sensor;
         ConfigurationFile* _configurationFile;
         Connection* _wifi;
         Keyboard* _keyboard;
         Led* _led;
+        IotHubClient* _iotHubClient;
 
         AppState nextState();
 

@@ -7,9 +7,6 @@
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
-
 #include "src/Constants.h"
 
 #ifdef TEST
@@ -34,14 +31,12 @@
 
     void setup()
     {
-        _application = new Application();
         Serial.begin(SERIAL_BAUD);
+        _application = new Application();
     }
 
     void loop()
     {
         _application->loop();
-        // TODO: remove delay when released
-        delay(50);
     }
 #endif
