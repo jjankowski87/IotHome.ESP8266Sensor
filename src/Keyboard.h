@@ -6,7 +6,11 @@
 class Keyboard
 {
     public:
-        Keyboard(byte resetPin) { _resetPin = resetPin; };
+        Keyboard(byte resetPin)
+        {
+            _resetPin = resetPin;
+            pinMode(_resetPin, INPUT);
+        };
 
         inline bool isButtonPressed(Buttons button) 
         {

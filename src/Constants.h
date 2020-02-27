@@ -11,7 +11,11 @@ const uint64_t SLEEP_TIME = 5 * 60e6; // 5 minutes
 const unsigned long WIFI_TIMEOUT = 180; // seconds
 const unsigned long INIT_DELAY = 3000; // ms
 
+const float BLINK_WIFI_SETUP = 2;
+const float BLINK_SEND = 0.2;
+const float BLINK_ERROR = 0.2;
+
 const char AP_NAME[] = "IoTSensor";
-const char AP_PASS[] = "Password";
+const char AP_PASS[] = "password";
 
 #endif

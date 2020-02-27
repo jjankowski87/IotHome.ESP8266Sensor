@@ -12,6 +12,7 @@ class Led
         ~Led();
 
         void blink(LedColor color, float seconds);
+        void on(LedColor color);
         void off(LedColor color);
     private:
         byte _greenPin;

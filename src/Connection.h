@@ -3,15 +3,17 @@
 
 #include <WiFiManager.h>
 #include "ConfigurationFile.h"
+#include "Led.h"
 
 class Connection
 {
     public:
-        Connection(ConfigurationFile *configurationFile);
+        Connection(ConfigurationFile* configurationFile, Led* led);
       
-        bool initialize(); 
+        bool connect(bool resetWiFi); 
     private:
-        ConfigurationFile *_configurationFile;
+        ConfigurationFile* _configurationFile;
+        Led* _led;
 };
 
 #endif
