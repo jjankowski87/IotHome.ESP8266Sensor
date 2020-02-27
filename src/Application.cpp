@@ -4,15 +4,15 @@
 
 Application::Application()
 {
-    _startupTime = millis();
-    _appState = AppState::Setup;
-
     _led = new Led(GREEN_LED_PIN, RED_LED_PIN);
     _keyboard = new Keyboard(RESET_BUTTON_PIN);
     _configurationFile = new ConfigurationFile();
     _wifi = new Connection(_configurationFile, _led);
-    _sensor = new BmeSensor(BME_ADDRESS);
+    _sensor = new EnvironmentalSensor(BME_ADDRESS);
     _iotHubClient = new IotHubClient();
+
+    _startupTime = millis();
+    _appState = AppState::Setup;
 }
 
 Application::~Application()
@@ -90,11 +90,18 @@ AppState Application::initialize()
 
 AppState Application::send()
 {
-    _led->blink(LedColor::Green, BLINK_SEND);
-
     Config config = _configurationFile->load();
-    _iotHubClient->sendMessage("temperature", _sensor->get(ReadingType::Temperature), config);
-    _iotHubClient->sendMessage("humidity", _sensor->get(ReadingType::Humidity), config);
+
+    bool isTemperatureSent = _iotHubClient->sendMessage("temperature", _sensor->get(ReadingType::Temperature), config);
+    bool isHumiditySent = _iotHubClient->sendMessage("humidity", _sensor->get(ReadingType::Humidity), config);
+
+    if (!isTemperatureSent || !isHumiditySent)
+    {
+        return AppState::Error;
+    }
+
+    _led->blink(LedColor::Green, BLINK_SEND);
+    delay(1200);
 
     return AppState::Finished;
 }
@@ -103,20 +110,27 @@ AppState Application::error()
 {
     _led->blink(LedColor::Red, BLINK_ERROR);
     delay(1200);
+    _led->off(LedColor::Red);
 
-    return AppState::Finished;
+    delay(RESTART_DELAY);
+    ESP.restart();
+
+    return AppState::Unknown;
 }
 
 AppState Application::finished()
 {
-    LOG_VERBOSE("finished");
-
     _led->off(LedColor::Green);
     _led->off(LedColor::Red);
 
-    // TODO: deep sleep SLEEP_TIME - processing time
-    // ESP.deepSleep(SLEEP_TIME);
-    delay(5000);
-    
-    return AppState::Finished;
+    unsigned long processingTime = millis() - _startupTime;
+    if (processingTime > SLEEP_TIME)
+    {
+        ESP.restart();
+        return AppState::Unknown;
+    }
+
+    ESP.deepSleep(SLEEP_TIME - processingTime);
+
+    return AppState::Unknown;
 }

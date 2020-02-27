@@ -3,16 +3,11 @@
 // UNCOMMENT THIS LINE TO RUN UNIT TESTS
 // #define TEST
 
-#include <FS.h> //this needs to be first, or it all crashes and burns...
-#include <ESP8266WiFi.h>
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include "src/Constants.h"
-
 #ifdef TEST
     #include <AUnit.h>
     #include "tests/ConfigurationTests.h"
     #include "tests/LedTests.h"
+    #include "src/Constants.h"
 
     void setup()
     {
@@ -26,6 +21,7 @@
     }
 #else
     #include "src/Application.h"
+    #include "src/Constants.h"
 
     Application* _application;
 

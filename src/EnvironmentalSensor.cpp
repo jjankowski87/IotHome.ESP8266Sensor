@@ -1,10 +1,10 @@
-#include "BmeSensor.h"
+#include "EnvironmentalSensor.h"
 #include "iotc/iotc.h"
 
-BmeSensor::BmeSensor(byte pin)
+EnvironmentalSensor::EnvironmentalSensor(byte pin)
 {
     _bme = new Adafruit_BME280();
-    _isConnected = _bme->begin();
+    _isConnected = _bme->begin(pin);
 
     if (!_isConnected)
     {
@@ -12,12 +12,12 @@ BmeSensor::BmeSensor(byte pin)
     }
 }
 
-BmeSensor::~BmeSensor()
+EnvironmentalSensor::~EnvironmentalSensor()
 {
     delete _bme;
 }
 
-float BmeSensor::get(ReadingType readingType)
+float EnvironmentalSensor::get(ReadingType readingType)
 {
     switch (readingType)
     {

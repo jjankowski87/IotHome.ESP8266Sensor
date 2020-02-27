@@ -19,7 +19,8 @@ enum AppState
     Initializing,
     Sending,
     Error,
-    Finished
+    Finished,
+    Unknown
 };
 
 enum ReadingType

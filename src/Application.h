@@ -1,7 +1,7 @@
 #ifndef Application_h
 #define Application_h
 
-#include "BmeSensor.h"
+#include "EnvironmentalSensor.h"
 #include "ConfigurationFile.h"
 #include "Connection.h"
 #include "Enums.h"
@@ -26,7 +26,7 @@ class Application
         State _state;
         unsigned long _startupTime;
 
-        BmeSensor* _sensor;
+        EnvironmentalSensor* _sensor;
         ConfigurationFile* _configurationFile;
         Connection* _wifi;
         Keyboard* _keyboard;

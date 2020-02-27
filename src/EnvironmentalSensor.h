@@ -1,15 +1,15 @@
-#ifndef BmeSensor_h
-#define BmeSensor_h
+#ifndef EnvironmentalSensor_h
+#define EnvironmentalSensor_h
 
 #include "Enums.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-class BmeSensor
+class EnvironmentalSensor
 {
     public:
-        BmeSensor(byte pin);
-        ~BmeSensor();
+        EnvironmentalSensor(byte pin);
+        ~EnvironmentalSensor();
 
         float get(ReadingType readingType);
         inline bool isConnected() { return _isConnected; };
