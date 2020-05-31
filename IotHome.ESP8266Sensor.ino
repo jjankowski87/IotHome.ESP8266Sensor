@@ -7,6 +7,7 @@
     #include <AUnit.h>
     #include "tests/ConfigurationTests.h"
     #include "tests/LedTests.h"
+    #include "tests/TimeHelperTests.h"
     #include "src/Constants.h"
 
     void setup()
@@ -25,9 +26,16 @@
 
     Application* _application;
 
+    void turnOffBuiltInLed(){
+        pinMode(BUILTIN_LED, OUTPUT);
+        digitalWrite(BUILTIN_LED, HIGH);
+    }
+
     void setup()
     {
         Serial.begin(SERIAL_BAUD);
+        turnOffBuiltInLed();
+
         _application = new Application();
     }
 

@@ -7,10 +7,12 @@ const uint8_t RESET_BUTTON_PIN = 0x0F;
 const uint8_t BME_ADDRESS = 0x76;
 
 const long SERIAL_BAUD = 115200;
-const uint64_t SLEEP_TIME = 5 * 60e6; // 5 minutes
-const unsigned long WIFI_TIMEOUT = 180; // seconds
-const unsigned long INIT_DELAY = 5000; // ms
-const unsigned long RESTART_DELAY = 10000; // ms
+
+// all times are in seconds
+const unsigned long DEFAULT_SLEEP_TIME = 10 * 60;
+const unsigned long WIFI_TIMEOUT = 180;
+const unsigned long INIT_DELAY = 5;
+const unsigned long RESTART_SLEEP_TIME = 30;
 
 const float BLINK_WIFI_SETUP = 2;
 const float BLINK_SEND = 0.2;
@@ -18,5 +20,7 @@ const float BLINK_ERROR = 0.2;
 
 const char AP_NAME[] = "IoTSensor";
 const char AP_PASS[] = "password";
+
+const char NEXT_READING_PATH[] = "/api/time/next-reading/";
 
 #endif

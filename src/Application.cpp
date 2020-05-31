@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Constants.h"
+#include "TimeHelper.h"
 #include "iotc/iotc.h"
 
 Application::Application()
@@ -35,6 +36,7 @@ inline AppState Application::nextState()
     switch (_appState)
     {
         case Setup: return setup();
+        case ReadSensor: return readSensor();
         case Waiting: return wait();
         case Initializing: return initialize();
         case Sending: return send();
@@ -49,6 +51,14 @@ AppState Application::setup()
     {
         return AppState::Error;
     }
+
+    return AppState::ReadSensor;
+}
+
+AppState Application::readSensor()
+{
+    _temperature = _sensor->get(ReadingType::Temperature);
+    _humidity = _sensor->get(ReadingType::Humidity);
 
     _led->on(LedColor::Green);
     return AppState::Waiting;
@@ -92,8 +102,8 @@ AppState Application::send()
 {
     Config config = _configurationFile->load();
 
-    bool isTemperatureSent = _iotHubClient->sendMessage("temperature", _sensor->get(ReadingType::Temperature), config);
-    bool isHumiditySent = _iotHubClient->sendMessage("humidity", _sensor->get(ReadingType::Humidity), config);
+    bool isTemperatureSent = _iotHubClient->sendMessage("temperature", _temperature, config);
+    bool isHumiditySent = _iotHubClient->sendMessage("humidity", _humidity, config);
 
     if (!isTemperatureSent || !isHumiditySent)
     {
@@ -112,8 +122,7 @@ AppState Application::error()
     delay(1200);
     _led->off(LedColor::Red);
 
-    delay(RESTART_DELAY);
-    ESP.restart();
+    ESP.deepSleep(TimeHelper::toUs(RESTART_SLEEP_TIME));
 
     return AppState::Unknown;
 }
@@ -123,14 +132,8 @@ AppState Application::finished()
     _led->off(LedColor::Green);
     _led->off(LedColor::Red);
 
-    unsigned long processingTime = millis() - _startupTime;
-    if (processingTime > SLEEP_TIME)
-    {
-        ESP.restart();
-        return AppState::Unknown;
-    }
-
-    ESP.deepSleep(SLEEP_TIME - processingTime);
+    long sleepTime = _wifi->getSleepTime(_startupTime);
+    ESP.deepSleep(sleepTime);
 
     return AppState::Unknown;
 }

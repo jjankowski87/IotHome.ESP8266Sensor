@@ -8,6 +8,7 @@
 #include "IotHubClient.h"
 #include "Keyboard.h"
 #include "Led.h"
+#include "TimeHelper.h"
 
 struct State
 {
@@ -26,6 +27,9 @@ class Application
         State _state;
         unsigned long _startupTime;
 
+        float _temperature;
+        float _humidity;
+
         EnvironmentalSensor* _sensor;
         ConfigurationFile* _configurationFile;
         Connection* _wifi;
@@ -36,13 +40,14 @@ class Application
         AppState nextState();
 
         AppState setup();
+        AppState readSensor();
         AppState wait();
         AppState initialize();
         AppState send(); 
         AppState error();
         AppState finished();
 
-        inline bool timePassed(unsigned long time) { return millis() - _startupTime >= time; };
+        inline bool timePassed(unsigned long seconds) { return millis() - _startupTime >= TimeHelper::toMs(seconds); };
 };
 
 #endif

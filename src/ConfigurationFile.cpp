@@ -30,12 +30,13 @@ Config ConfigurationFile::load()
         return config;
     }
 
-    StaticJsonDocument<267> doc;
+    StaticJsonDocument<503> doc;
     DeserializationError error = deserializeJson(doc, file);
     if (!error)
     {
         strlcpy(config.deviceName, doc["deviceName"], sizeof(config.deviceName));
         strlcpy(config.deviceKey, doc["deviceKey"], sizeof(config.deviceKey));
+        strlcpy(config.serviceUrl, doc["serviceUrl"], sizeof(config.serviceUrl));
     }
     else
     {
@@ -46,7 +47,7 @@ Config ConfigurationFile::load()
     return config;
 }
 
-void ConfigurationFile::save(char deviceName[20], char deviceKey[200])
+void ConfigurationFile::save(char deviceName[20], char deviceKey[200], char serviceUrl[200])
 {
     File file = SPIFFS.open(ConfigFileName, "w");
     if (!file)
@@ -56,10 +57,11 @@ void ConfigurationFile::save(char deviceName[20], char deviceKey[200])
     }
 
     // Use arduinojson.org/v6/assistant to compute the capacity.
-    StaticJsonDocument<267> doc;
+    StaticJsonDocument<503> doc;
 
     doc["deviceName"] = deviceName;
     doc["deviceKey"] = deviceKey;
+    doc["serviceUrl"] = serviceUrl;
 
     if (serializeJson(doc, file) == 0)
     {

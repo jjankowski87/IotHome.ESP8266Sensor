@@ -15,6 +15,7 @@ enum LedColor
 enum AppState
 {
     Setup,
+    ReadSensor,
     Waiting,
     Initializing,
     Sending,

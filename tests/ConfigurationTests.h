@@ -15,7 +15,7 @@ test(ShouldReturnEmptyConfiguration_WhenRemoved)
 {
   ConfigurationFile configurationFile;
 
-  configurationFile.save("some name", "some key");
+  configurationFile.save("some name", "some key", "some url");
   configurationFile.remove();
   Config config = configurationFile.load();
 
@@ -26,12 +26,13 @@ test(ShouldReturnUpdatedConfiguration_WhenSaved)
 {
   ConfigurationFile configurationFile;
 
-  configurationFile.save("some name", "some key");
+  configurationFile.save("some name", "some key", "some url");
   Config config = configurationFile.load();
 
   assertFalse(config.isEmpty());
   assertEqual(config.deviceName, "some name");
   assertEqual(config.deviceKey, "some key");
+  assertEqual(config.serviceUrl, "some url");
 }
 
 #endif

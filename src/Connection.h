@@ -13,7 +13,8 @@ class Connection
     public:
         Connection(ConfigurationFile* configurationFile, Led* led);
 
-        bool connect(bool resetWiFi); 
+        bool connect(bool resetWiFi);
+        long long getSleepTime(unsigned long startupTime);
     private:
         ConfigurationFile* _configurationFile;
         Led* _led;
