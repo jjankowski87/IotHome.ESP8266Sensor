@@ -79,5 +79,21 @@ long long Connection::getSleepTime(unsigned long startupTime)
     LOG_ERROR("Cannot get sleep time from %s, response code: %d.", serviceUrl, httpCode);
     http.end();
 
-    return TimeHelper::toUs(DEFAULT_SLEEP_TIME - (millis() - startupTime));
+    return getDefaultSleepTime(startupTime);
+}
+
+long long Connection::getDefaultSleepTime(unsigned long startupTime)
+{
+    unsigned long sleepTime = DEFAULT_SLEEP_TIME - (millis() - startupTime);
+
+    if (sleepTime < 1)
+    {
+        return TimeHelper::toUs(1);
+    }
+    else if (sleepTime > DEFAULT_SLEEP_TIME)
+    {
+        return TimeHelper::toUs(DEFAULT_SLEEP_TIME);
+    }
+
+    return TimeHelper::toUs(sleepTime);
 }

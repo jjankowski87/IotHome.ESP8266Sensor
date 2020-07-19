@@ -18,6 +18,8 @@ class Connection
     private:
         ConfigurationFile* _configurationFile;
         Led* _led;
+
+        long long getDefaultSleepTime(unsigned long startupTime);
 };
 
 #endif
