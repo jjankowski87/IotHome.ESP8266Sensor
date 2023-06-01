@@ -44,6 +44,8 @@ class Application
         AppState wait();
         AppState initialize();
         AppState send(); 
+        bool sendTemperature(Config config);
+        bool sendHumidity(Config config);
         AppState error();
         AppState finished();
 

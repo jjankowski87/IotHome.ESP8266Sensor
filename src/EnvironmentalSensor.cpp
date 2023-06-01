@@ -31,5 +31,6 @@ float EnvironmentalSensor::get(ReadingType readingType)
     {
         case Temperature: return _bme->readTemperature();
         case Humidity: return _bme->readHumidity();
+        default: return 0;
     }
 }

@@ -11,7 +11,7 @@ const long SERIAL_BAUD = 115200;
 // all times are in seconds
 const unsigned long DEFAULT_SLEEP_TIME = 10 * 60;
 const unsigned long WIFI_TIMEOUT = 180;
-const unsigned long INIT_DELAY = 5;
+const unsigned long INIT_DELAY = 60;
 const unsigned long RESTART_SLEEP_TIME = 30;
 
 const float BLINK_WIFI_SETUP = 2;

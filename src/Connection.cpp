@@ -65,8 +65,9 @@ long long Connection::getSleepTime(unsigned long startupTime)
     char serviceUrl[sizeof(config.serviceUrl) + sizeof(NEXT_READING_PATH)];
     sprintf(serviceUrl, "%s%s", config.serviceUrl, NEXT_READING_PATH);
 
+    WiFiClient client;
     HTTPClient http;
-    bool result = http.begin(serviceUrl);
+    bool result = http.begin(client, serviceUrl);
     int httpCode = http.GET();
     if(httpCode == HTTP_CODE_OK)
     {

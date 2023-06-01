@@ -42,6 +42,7 @@ inline AppState Application::nextState()
         case Sending: return send();
         case Error: return error();
         case Finished: return finished();
+        default: return error();
     }
 }
 
@@ -102,8 +103,8 @@ AppState Application::send()
 {
     Config config = _configurationFile->load();
 
-    bool isTemperatureSent = _iotHubClient->sendMessage("temperature", _temperature, config);
-    bool isHumiditySent = _iotHubClient->sendMessage("humidity", _humidity, config);
+    bool isTemperatureSent = sendTemperature(config);
+    bool isHumiditySent = sendHumidity(config);
 
     if (!isTemperatureSent || !isHumiditySent)
     {
@@ -114,6 +115,26 @@ AppState Application::send()
     delay(1200);
 
     return AppState::Finished;
+}
+
+bool Application::sendTemperature(Config config)
+{
+    if (_temperature > 80 || _temperature < -50)
+    {
+        return false;
+    }
+
+    return _iotHubClient->sendMessage("temperature", _temperature, config);
+}
+
+bool Application::sendHumidity(Config config)
+{
+    if (_humidity > 100 || _humidity < 0)
+    {
+        return false;
+    }
+
+    return _iotHubClient->sendMessage("humidity", _humidity, config);
 }
 
 AppState Application::error()
